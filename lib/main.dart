@@ -25,8 +25,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  double dragStart = 0.0;
-  double progress = 0.0;
+  
+  double offset = 0.0;
+  double opacity = 1.0;
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +49,18 @@ class _MyHomePageState extends State<MyHomePage> {
               onHorizontalDragEnd: _onDragEnd,
               child: Stack(
                 children: <Widget>[
-                  EventCard(image: "assets/asia.jpg", progress: progress),
-                  EventCard(image: "assets/man.jpg", progress: progress + .6),
                   EventCard(
-                    image: "assets/trees.jpg",
-                    progress: 1.0 - progress,
-                  ),
+                      image: "assets/asia.jpg",
+                      opacity: opacity / 3,
+                      offset: (offset / 10) + 80),
+                  EventCard(
+                      image: "assets/man.jpg",
+                      opacity: opacity / 2,
+                      offset: (offset / 8) + 40),
+                  EventCard(
+                      image: "assets/trees.jpg",
+                      opacity: opacity,
+                      offset: offset),
                 ],
               ),
             ),
@@ -63,17 +71,20 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _onDragStart(DragStartDetails details) {
-    dragStart = details.globalPosition.dx;
   }
 
   _onDragUpdate(DragUpdateDetails details) {
     setState(() {
-      progress = ((100 * dragStart - details.globalPosition.dx) / 1.0).clamp(0.0, 1.0);
+      offset += details.delta.dx;
+      // opacity = (1 - (offset.abs())).clamp(0.0, 1.0);
     });
   }
 
   _onDragEnd(DragEndDetails details) {
-    progress = 1.0;
+    setState(() {
+      offset = 0.0;
+      opacity = 1.0;
+    });
   }
 }
 
@@ -100,22 +111,27 @@ class EventTitle extends StatelessWidget {
 class EventCard extends StatelessWidget {
   final String image;
   final bool interested;
-  final double progress;
+
+  final double opacity;
+  final double offset;
 
   final Size size = const Size(280, 400);
 
-  const EventCard({Key key, this.image, this.interested, this.progress})
-      : super(key: key);
+  const EventCard({
+    Key key,
+    this.image,
+    this.interested,
+    this.offset = 0.0,
+    this.opacity = 1.0,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final offset = 40 + progress * 80;
-
     return Transform.translate(
-      offset: Offset(offset, progress * 15),
+      offset: Offset(40 + offset, 0.0),
       child: SizedBox(
-        width: size.width - (progress * 40),
-        height: size.height - (progress * 40),
+        width: size.width,
+        height: size.height,
         child: Opacity(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15.0),
@@ -124,7 +140,7 @@ class EventCard extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          opacity: 1.0 - (progress / 2),
+          opacity: opacity,
         ),
       ),
     );
