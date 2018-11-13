@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
         model.offset += details.delta.dx / (i * 6);
 
         model.opacity = (model.opacity + (model.offset.abs() / (i * 5000)))
-            .clamp(0.0, 1.0);
+            .clamp(0.0, 1.0 / i);
       }
     });
   }
