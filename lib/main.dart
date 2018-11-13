@@ -51,15 +51,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   EventCard(
                       image: "assets/asia.jpg",
-                      opacity: opacity / 3,
+                      opacity: (opacity / 3).clamp(1.0 / 3, 1.0),
                       offset: (offset / 10) + 80),
                   EventCard(
                       image: "assets/man.jpg",
-                      opacity: opacity / 2,
+                      opacity: (opacity / 2).clamp(1.0 / 2, 1.0),
                       offset: (offset / 8) + 40),
                   EventCard(
                       image: "assets/trees.jpg",
-                      opacity: opacity,
+                      opacity: 1.0,
                       offset: offset),
                 ],
               ),
@@ -76,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
   _onDragUpdate(DragUpdateDetails details) {
     setState(() {
       offset += details.delta.dx;
-      // opacity = (1 - (offset.abs())).clamp(0.0, 1.0);
+      opacity = (offset.abs() / 100);
     });
   }
 
