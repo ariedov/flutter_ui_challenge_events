@@ -30,16 +30,19 @@ class _MyHomePageState extends State<MyHomePage> {
       "assets/asia.jpg",
       0.0,
       1.0,
+      0.0,
     ),
     ViewModel(
       "assets/man.jpg",
-      40,
+      80,
       0.5,
+      30.0,
     ),
     ViewModel(
       "assets/trees.jpg",
-      80,
+      130,
       0.3,
+      60.0,
     )
   ];
 
@@ -72,7 +75,11 @@ class _MyHomePageState extends State<MyHomePage> {
     return models
         .map((model) {
           return EventCard(
-              image: model.image, opacity: model.opacity, offset: model.offset);
+            image: model.image,
+            opacity: model.opacity,
+            offset: model.offset,
+            sizeOffset: model.sizeOffset,
+          );
         })
         .toList()
         .reversed
@@ -89,11 +96,13 @@ class _MyHomePageState extends State<MyHomePage> {
         if (i == 0) {
           model.opacity = 1.0;
           model.offset += details.delta.dx;
+          model.sizeOffset -= details.delta.dx / 12;
           continue;
         }
 
-        model.offset += details.delta.dx / (i * 6);
-
+        final distance = details.delta.dx / (i * 6);
+        model.offset += distance;
+        model.sizeOffset += distance;
         model.opacity = (model.opacity + (model.offset.abs() / (i * 5000)))
             .clamp(0.0, 1.0 / i);
       }
@@ -107,16 +116,19 @@ class _MyHomePageState extends State<MyHomePage> {
           "assets/asia.jpg",
           0.0,
           1.0,
+          0.0,
         ),
         ViewModel(
           "assets/man.jpg",
-          40,
+          80,
           0.5,
+          30.0,
         ),
         ViewModel(
           "assets/trees.jpg",
-          80,
+          130,
           0.3,
+          60.0,
         )
       ];
     });
@@ -127,8 +139,9 @@ class ViewModel {
   String image;
   double offset = 0.0;
   double opacity = 1.0;
+  double sizeOffset = 0.0;
 
-  ViewModel(this.image, this.offset, this.opacity);
+  ViewModel(this.image, this.offset, this.opacity, this.sizeOffset);
 }
 
 class EventTitle extends StatelessWidget {
@@ -157,6 +170,7 @@ class EventCard extends StatelessWidget {
 
   final double opacity;
   final double offset;
+  final double sizeOffset;
 
   final Size size = const Size(280, 400);
 
@@ -166,15 +180,16 @@ class EventCard extends StatelessWidget {
     this.interested,
     this.offset = 0.0,
     this.opacity = 1.0,
+    this.sizeOffset = 0.0,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
-      offset: Offset(40 + offset, 0.0),
+      offset: Offset(40 + offset, sizeOffset / 2),
       child: SizedBox(
-        width: size.width,
-        height: size.height,
+        width: size.width - sizeOffset,
+        height: size.height - sizeOffset,
         child: Opacity(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(15.0),
