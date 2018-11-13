@@ -24,7 +24,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   List<ViewModel> models = [
     ViewModel(
       "assets/asia.jpg",
@@ -34,17 +34,41 @@ class _MyHomePageState extends State<MyHomePage> {
     ),
     ViewModel(
       "assets/man.jpg",
-      80,
-      0.5,
+      70,
+      0.6,
       30.0,
     ),
     ViewModel(
       "assets/trees.jpg",
-      130,
+      140,
       0.3,
       60.0,
     )
   ];
+
+  List<Tween<double>> offsetTweens = [];
+  List<Tween<double>> sizeOffsetTweens = [];
+  List<Tween<double>> opacityTweens = [];
+
+  AnimationController _swipeController;
+
+  @override
+  void initState() {
+    _swipeController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+          ..addListener(() {
+            setState(() {
+              for (var i = 0; i < models.length; ++i) {
+                models[i].offset = offsetTweens[i].evaluate(_swipeController);
+                models[i].sizeOffset =
+                    sizeOffsetTweens[i].evaluate(_swipeController);
+                models[i].opacity = opacityTweens[i].evaluate(_swipeController);
+              }
+            });
+          })
+          ..addStatusListener((status) {});
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,28 +134,19 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   _onDragEnd(DragEndDetails details) {
-    setState(() {
-      models = [
-        ViewModel(
-          "assets/asia.jpg",
-          0.0,
-          1.0,
-          0.0,
-        ),
-        ViewModel(
-          "assets/man.jpg",
-          80,
-          0.5,
-          30.0,
-        ),
-        ViewModel(
-          "assets/trees.jpg",
-          130,
-          0.3,
-          60.0,
-        )
-      ];
-    });
+    offsetTweens.clear();
+    sizeOffsetTweens.clear();
+    opacityTweens.clear();
+
+    for (var i = 0; i < models.length; ++i) {
+      offsetTweens.add(Tween(
+          begin: models[i].offset, end: i == 0 ? -600.0 : 70.0 * (i - 1)));
+      sizeOffsetTweens.add(
+          Tween(begin: models[i].sizeOffset, end: i == 0 ? 0 : 30.0 * (i - 1)));
+      opacityTweens.add(
+          Tween(begin: models[i].opacity, end: i == 0 ? 0 : 1 - (0.3 * (i - 1))));
+    }
+    _swipeController.forward(from: 0.0);
   }
 }
 
