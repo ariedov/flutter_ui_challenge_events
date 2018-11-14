@@ -52,21 +52,27 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   AnimationController _swipeController;
 
+  int position = 0;
+
   @override
   void initState() {
     _swipeController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 250))
           ..addListener(() {
             setState(() {
-              for (var i = 0; i < models.length; ++i) {
-                models[i].offset = offsetTweens[i].evaluate(_swipeController);
-                models[i].sizeOffset =
+              for (var i = 0; i < models.length - position; ++i) {
+                models[position + i].offset = offsetTweens[i].evaluate(_swipeController);
+                models[position + i].sizeOffset =
                     sizeOffsetTweens[i].evaluate(_swipeController);
-                models[i].opacity = opacityTweens[i].evaluate(_swipeController);
+                models[position + i].opacity = opacityTweens[i].evaluate(_swipeController);
               }
             });
           })
-          ..addStatusListener((status) {});
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              position += 1;
+            }
+          });
     super.initState();
   }
 
@@ -114,10 +120,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
   _onDragUpdate(DragUpdateDetails details) {
     setState(() {
-      for (var i = 0; i < models.length; ++i) {
+      for (var i = position; i < models.length; ++i) {
         final model = models[i];
 
-        if (i == 0) {
+        if (i == position) {
           model.opacity = 1.0;
           model.offset += details.delta.dx;
           model.sizeOffset -= details.delta.dx / 12;
@@ -138,15 +144,43 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     sizeOffsetTweens.clear();
     opacityTweens.clear();
 
-    for (var i = 0; i < models.length; ++i) {
+    for (var i = position; i < models.length; ++i) {
       offsetTweens.add(Tween(
-          begin: models[i].offset, end: i == 0 ? -600.0 : 70.0 * (i - 1)));
-      sizeOffsetTweens.add(
-          Tween(begin: models[i].sizeOffset, end: i == 0 ? 0 : 30.0 * (i - 1)));
-      opacityTweens.add(
-          Tween(begin: models[i].opacity, end: i == 0 ? 0 : 1 - (0.3 * (i - 1))));
+          begin: models[i].offset,
+          end: i == position ? -600.0 : 70.0 * (i - position - 1)));
+      sizeOffsetTweens.add(Tween(
+          begin: models[i].sizeOffset,
+          end: i == position ? 0 : 30.0 * (i - position - 1)));
+      opacityTweens.add(Tween(
+          begin: models[i].opacity,
+          end: i == position ? 0 : 1 - (0.3 * (i - position - 1))));
     }
     _swipeController.forward(from: 0.0);
+  }
+
+  @override
+  void reassemble() {
+    models = [
+      ViewModel(
+        "assets/asia.jpg",
+        0.0,
+        1.0,
+        0.0,
+      ),
+      ViewModel(
+        "assets/man.jpg",
+        70,
+        0.6,
+        30.0,
+      ),
+      ViewModel(
+        "assets/trees.jpg",
+        140,
+        0.3,
+        60.0,
+      )
+    ];
+    super.reassemble();
   }
 }
 
