@@ -53,6 +53,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   AnimationController _swipeController;
 
   int position = 0;
+  Direction direction = Direction.NONE;
 
   @override
   void initState() {
@@ -61,10 +62,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           ..addListener(() {
             setState(() {
               for (var i = 0; i < models.length - position; ++i) {
-                models[position + i].offset = offsetTweens[i].evaluate(_swipeController);
+                models[position + i].offset =
+                    offsetTweens[i].evaluate(_swipeController);
                 models[position + i].sizeOffset =
                     sizeOffsetTweens[i].evaluate(_swipeController);
-                models[position + i].opacity = opacityTweens[i].evaluate(_swipeController);
+                models[position + i].opacity =
+                    opacityTweens[i].evaluate(_swipeController);
               }
             });
           })
@@ -119,6 +122,15 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   _onDragStart(DragStartDetails details) {}
 
   _onDragUpdate(DragUpdateDetails details) {
+    if (direction == Direction.NONE) {
+      if (details.delta.dx > 0) {
+        direction = Direction.BACK;
+        position -= 1;
+      } else {
+        direction = Direction.AWAY;
+      }
+    }
+
     setState(() {
       for (var i = position; i < models.length; ++i) {
         final model = models[i];
@@ -156,6 +168,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
           end: i == position ? 0 : 1 - (0.3 * (i - position - 1))));
     }
     _swipeController.forward(from: 0.0);
+    direction = Direction.NONE;
   }
 
   @override
@@ -180,6 +193,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         60.0,
       )
     ];
+
     super.reassemble();
   }
 }
@@ -253,3 +267,5 @@ class EventCard extends StatelessWidget {
     );
   }
 }
+
+enum Direction { AWAY, BACK, NONE }
