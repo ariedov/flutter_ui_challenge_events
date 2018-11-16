@@ -51,6 +51,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   List<Tween<double>> opacityTweens = [];
 
   AnimationController _swipeController;
+  AnimationController _backController;
 
   int position = 0;
   Direction direction = Direction.NONE;
@@ -75,6 +76,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
             if (status == AnimationStatus.completed) {
               position += 1;
             }
+          });
+
+    _backController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
+          ..addListener(() {
+            setState(() {
+              for (var i = 0; i < models.length - position; ++i) {
+                models[position + i].offset =
+                    offsetTweens[i].evaluate(_backController);
+                models[position + i].sizeOffset =
+                    sizeOffsetTweens[i].evaluate(_backController);
+                models[position + i].opacity =
+                    opacityTweens[i].evaluate(_backController);
+              }
+            });
           });
     super.initState();
   }
@@ -156,18 +172,33 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     sizeOffsetTweens.clear();
     opacityTweens.clear();
 
-    for (var i = position; i < models.length; ++i) {
-      offsetTweens.add(Tween(
-          begin: models[i].offset,
-          end: i == position ? -600.0 : 70.0 * (i - position - 1)));
-      sizeOffsetTweens.add(Tween(
-          begin: models[i].sizeOffset,
-          end: i == position ? 0 : 30.0 * (i - position - 1)));
-      opacityTweens.add(Tween(
-          begin: models[i].opacity,
-          end: i == position ? 0 : 1 - (0.3 * (i - position - 1))));
+    if (direction == Direction.AWAY) {
+      for (var i = position; i < models.length; ++i) {
+        offsetTweens.add(Tween(
+            begin: models[i].offset,
+            end: i == position ? -280.0 : 70.0 * (i - position - 1)));
+        sizeOffsetTweens.add(Tween(
+            begin: models[i].sizeOffset,
+            end: i == position ? 0 : 30.0 * (i - position - 1)));
+        opacityTweens.add(Tween(
+            begin: models[i].opacity,
+            end: i == position ? 0 : 1 - (0.3 * (i - position - 1))));
+      }
+      _swipeController.forward(from: 0.0);
+    } else {
+      for (var i = position; i < models.length; ++i) {
+        offsetTweens.add(Tween(
+            begin: models[i].offset,
+            end: 70.0 * (i)));
+        sizeOffsetTweens.add(Tween(
+            begin: models[i].sizeOffset,
+            end: 30.0 * (i)));
+        opacityTweens.add(Tween(
+            begin: models[i].opacity,
+            end: 1 - (0.3 * i)));
+      }
+      _backController.forward(from: 0.0);
     }
-    _swipeController.forward(from: 0.0);
     direction = Direction.NONE;
   }
 
@@ -193,6 +224,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         60.0,
       )
     ];
+
+    position = 0;
+    direction = Direction.NONE;
 
     super.reassemble();
   }
