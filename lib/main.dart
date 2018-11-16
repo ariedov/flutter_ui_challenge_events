@@ -160,9 +160,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
 
         final distance = details.delta.dx / (i * 6);
         model.offset += distance;
-        model.sizeOffset += distance;
-        model.opacity = (model.opacity + (model.offset.abs() / (i * 5000)))
-            .clamp(0.0, 1.0 / i);
+        model.sizeOffset = (model.sizeOffset + distance).clamp(0.0, 400.0);
+
+        final targetOpacity = 0.3 * i;
+        final targetOffset = 70 * i;
+
+        model.opacity = 1 - (targetOpacity * model.offset / targetOffset);
+
+        print("position: $position; i: $i; offset: ${model.offset}; opacity: ${model.opacity};");
       }
     });
   }
