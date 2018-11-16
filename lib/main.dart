@@ -189,13 +189,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       for (var i = position; i < models.length; ++i) {
         offsetTweens.add(Tween(
             begin: models[i].offset,
-            end: 70.0 * (i)));
+            end: 70.0 * (i - position)));
         sizeOffsetTweens.add(Tween(
             begin: models[i].sizeOffset,
-            end: 30.0 * (i)));
+            end: 30.0 * (i - position)));
         opacityTweens.add(Tween(
             begin: models[i].opacity,
-            end: 1 - (0.3 * i)));
+            end: i == position ? 1 : 1 - (0.3 * (i - position))));
       }
       _backController.forward(from: 0.0);
     }
