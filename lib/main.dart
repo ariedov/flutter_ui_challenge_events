@@ -28,15 +28,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   ScrollController scrollController;
   int position = 0;
 
   @override
-    void initState() {
-      scrollController = ScrollController();
-      super.initState();
-    }
+  void initState() {
+    scrollController = ScrollController();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,8 +54,7 @@ class _HomePageState extends State<HomePage> {
             ),
             Cards(
               onProgress: (progress, direction) {
-
-                final titleHeight = (40 + 64);
+                final titleHeight = (60 + 48);
 
                 final offset = scrollController.offset;
                 var newOffset = progress * titleHeight / 100;
@@ -64,7 +62,8 @@ class _HomePageState extends State<HomePage> {
                   newOffset *= -1;
                 }
 
-                print("progress: $progress; direction: $direction; offse: $offset, newOffset: $newOffset");
+                print(
+                    "progress: $progress; direction: $direction; offse: $offset, newOffset: $newOffset");
                 scrollController.jumpTo((position * titleHeight) + newOffset);
               },
             ),
@@ -119,21 +118,36 @@ class EventTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.symmetric(
+          horizontal: 32.0, vertical: 24.0),
       child: SizedBox(
-        height: 40.0,
+        height: 60.0,
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  Text(title.title),
-                  Text(title.location),
+                  Text(
+                    title.title,
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 24.0),
+                  ),
+                  Text(
+                    title.location,
+                    style: TextStyle(fontSize: 16.0),
+                  ),
                 ],
               ),
             ),
-            Text(title.date)
+            Padding(
+              padding: EdgeInsets.only(top: 4.0),
+              child: Text(
+                title.date,
+                style: TextStyle(fontSize: 16.0),
+              ),
+            )
           ],
         ),
       ),
