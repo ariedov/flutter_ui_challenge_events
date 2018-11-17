@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_events/cards.dart';
 
 void main() => runApp(MyApp());
 
@@ -10,96 +11,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Colors.white,
       ),
-      home: MyHomePage(title: 'Events'),
+      home: HomePage(title: 'Events'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
+class HomePage extends StatelessWidget {
   final String title;
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  List<ViewModel> models = [
-    ViewModel(
-      "assets/asia.jpg",
-      0.0,
-      1.0,
-      0.0,
-    ),
-    ViewModel(
-      "assets/man.jpg",
-      70,
-      0.6,
-      30.0,
-    ),
-    ViewModel(
-      "assets/trees.jpg",
-      140,
-      0.3,
-      60.0,
-    )
-  ];
-
-  List<Tween<double>> offsetTweens = [];
-  List<Tween<double>> sizeOffsetTweens = [];
-  List<Tween<double>> opacityTweens = [];
-
-  AnimationController _swipeController;
-  AnimationController _backController;
-
-  int position = 0;
-  Direction direction = Direction.NONE;
-
-  @override
-  void initState() {
-    _swipeController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(() {
-            setState(() {
-              for (var i = 0; i < models.length - position; ++i) {
-                models[position + i].offset =
-                    offsetTweens[i].evaluate(_swipeController);
-                models[position + i].sizeOffset =
-                    sizeOffsetTweens[i].evaluate(_swipeController);
-                models[position + i].opacity =
-                    opacityTweens[i].evaluate(_swipeController);
-              }
-            });
-          })
-          ..addStatusListener((status) {
-            if (status == AnimationStatus.completed) {
-              position += 1;
-            }
-          });
-
-    _backController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 250))
-          ..addListener(() {
-            setState(() {
-              for (var i = 0; i < models.length - position; ++i) {
-                models[position + i].offset =
-                    offsetTweens[i].evaluate(_backController);
-                models[position + i].sizeOffset =
-                    sizeOffsetTweens[i].evaluate(_backController);
-                models[position + i].opacity =
-                    opacityTweens[i].evaluate(_backController);
-              }
-            });
-          });
-    super.initState();
-  }
+  const HomePage({Key key, this.title}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(title),
         elevation: 0.0,
       ),
       body: Container(
@@ -107,204 +32,66 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            EventTitle(),
-            GestureDetector(
-              onHorizontalDragStart: _onDragStart,
-              onHorizontalDragUpdate: _onDragUpdate,
-              onHorizontalDragEnd: _onDragEnd,
-              child: Stack(children: _buildStack()),
+            TitleSwitcher(),
+            Cards(
+              onProgress: (progress, direction) {
+                print("progress: $progress; direction: $direction");
+              },
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  List<Widget> _buildStack() {
-    return models
-        .map((model) {
-          return EventCard(
-            image: model.image,
-            opacity: model.opacity,
-            offset: model.offset,
-            sizeOffset: model.sizeOffset,
-          );
-        })
-        .toList()
-        .reversed
-        .toList();
-  }
-
-  _onDragStart(DragStartDetails details) {}
-
-  _onDragUpdate(DragUpdateDetails details) {
-    if (direction == Direction.NONE) {
-      if (details.delta.dx > 0) {
-        direction = Direction.BACK;
-        position -= 1;
-      } else {
-        direction = Direction.AWAY;
-      }
-    }
-
-    setState(() {
-      for (var i = position; i < models.length; ++i) {
-        final model = models[i];
-
-        if (i == position) {
-          model.opacity = 1.0;
-          model.offset += details.delta.dx;
-          model.sizeOffset -= details.delta.dx / 12;
-          continue;
-        }
-
-        final distance = details.delta.dx / (i * 6);
-        model.offset += distance;
-        model.sizeOffset = (model.sizeOffset + distance).clamp(0.0, 400.0);
-
-        final targetOpacity = 0.3 * i;
-        final targetOffset = 70 * i;
-
-        model.opacity = 1 - (targetOpacity * model.offset / targetOffset);
-
-        print("position: $position; i: $i; offset: ${model.offset}; opacity: ${model.opacity};");
-      }
-    });
-  }
-
-  _onDragEnd(DragEndDetails details) {
-    offsetTweens.clear();
-    sizeOffsetTweens.clear();
-    opacityTweens.clear();
-
-    if (direction == Direction.AWAY) {
-      for (var i = position; i < models.length; ++i) {
-        offsetTweens.add(Tween(
-            begin: models[i].offset,
-            end: i == position ? -280.0 : 70.0 * (i - position - 1)));
-        sizeOffsetTweens.add(Tween(
-            begin: models[i].sizeOffset,
-            end: i == position ? 0 : 30.0 * (i - position - 1)));
-        opacityTweens.add(Tween(
-            begin: models[i].opacity,
-            end: i == position ? 0 : 1 - (0.3 * (i - position - 1))));
-      }
-      _swipeController.forward(from: 0.0);
-    } else {
-      for (var i = position; i < models.length; ++i) {
-        offsetTweens.add(Tween(
-            begin: models[i].offset,
-            end: 70.0 * (i - position)));
-        sizeOffsetTweens.add(Tween(
-            begin: models[i].sizeOffset,
-            end: 30.0 * (i - position)));
-        opacityTweens.add(Tween(
-            begin: models[i].opacity,
-            end: i == position ? 1 : 1 - (0.3 * (i - position))));
-      }
-      _backController.forward(from: 0.0);
-    }
-    direction = Direction.NONE;
-  }
+class TitleSwitcher extends StatelessWidget {
+  final List<Title> titles = [
+    Title("Fashion Talk", "Kyiv", "Nov 24, 2018"),
+    Title("Fashion Talk", "Kyiv", "Nov 24, 2018"),
+    Title("Fashion Talk", "Kyiv", "Nov 24, 2018"),
+  ];
 
   @override
-  void reassemble() {
-    models = [
-      ViewModel(
-        "assets/asia.jpg",
-        0.0,
-        1.0,
-        0.0,
-      ),
-      ViewModel(
-        "assets/man.jpg",
-        70,
-        0.6,
-        30.0,
-      ),
-      ViewModel(
-        "assets/trees.jpg",
-        140,
-        0.3,
-        60.0,
-      )
-    ];
-
-    position = 0;
-    direction = Direction.NONE;
-
-    super.reassemble();
+  Widget build(BuildContext context) {
+    return EventTitle(titles[0]);
   }
 }
 
-class ViewModel {
-  String image;
-  double offset = 0.0;
-  double opacity = 1.0;
-  double sizeOffset = 0.0;
+class Title {
+  final String title;
+  final String location;
+  final String date;
 
-  ViewModel(this.image, this.offset, this.opacity, this.sizeOffset);
+  Title(this.title, this.location, this.date);
 }
 
 class EventTitle extends StatelessWidget {
+  final Title title;
+
+  const EventTitle(this.title, {Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(32.0),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[Text("Fashion Talk"), Text("Kyiv")],
-            ),
-          ),
-          Text("Nov 24, 2017")
-        ],
-      ),
-    );
-  }
-}
-
-class EventCard extends StatelessWidget {
-  final String image;
-  final bool interested;
-
-  final double opacity;
-  final double offset;
-  final double sizeOffset;
-
-  final Size size = const Size(280, 400);
-
-  const EventCard({
-    Key key,
-    this.image,
-    this.interested,
-    this.offset = 0.0,
-    this.opacity = 1.0,
-    this.sizeOffset = 0.0,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Transform.translate(
-      offset: Offset(40 + offset, sizeOffset / 2),
       child: SizedBox(
-        width: size.width - sizeOffset,
-        height: size.height - sizeOffset,
-        child: Opacity(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(15.0),
-            child: Image.asset(
-              image,
-              fit: BoxFit.cover,
+        height: 40.0,
+        child: Row(
+          children: <Widget>[
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(title.title),
+                  Text(title.location),
+                ],
+              ),
             ),
-          ),
-          opacity: opacity,
+            Text(title.date)
+          ],
         ),
       ),
     );
   }
 }
-
-enum Direction { AWAY, BACK, NONE }
