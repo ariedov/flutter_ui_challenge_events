@@ -54,33 +54,56 @@ class _HomePageState extends State<HomePage> {
             TitleSwitcher(
               scrollController: scrollController,
             ),
-            Cards(
-              onProgress: (progress, direction) {
-                final titleHeight = (60 + 48);
+            SizedBox(
+              height: 400.0,
+              child: Cards(
+                onProgress: (progress, direction) {
+                  final titleHeight = (60 + 48);
 
-                var newOffset = progress * titleHeight / 100;
-                if (direction == Direction.AWAY) {
-                  newOffset += (position * titleHeight);
-                }
-
-                if (direction == Direction.BACK) {
-                  newOffset = ((position) * titleHeight) - newOffset;
-                }
-
-                if (progress == 100 && direction == Direction.NONE) {
-                  if (this.direction == Direction.AWAY) {
-                    position += 1;
-                  } else {
-                    position -= 1;
+                  var newOffset = progress * titleHeight / 100;
+                  if (direction == Direction.AWAY) {
+                    newOffset += (position * titleHeight);
                   }
-                } else {
-                  print(
-                      "progress: $progress; direction: $direction; newOffset: $newOffset");
-                  scrollController.jumpTo(newOffset);
-                }
 
-                this.direction = direction;
-              },
+                  if (direction == Direction.BACK) {
+                    newOffset = ((position) * titleHeight) - newOffset;
+                  }
+
+                  if (progress == 100 && direction == Direction.NONE) {
+                    if (this.direction == Direction.AWAY) {
+                      position += 1;
+                    } else {
+                      position -= 1;
+                    }
+                  } else {
+                    print(
+                        "progress: $progress; direction: $direction; newOffset: $newOffset");
+                    scrollController.jumpTo(newOffset);
+                  }
+
+                  this.direction = direction;
+                },
+              ),
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  Icon(
+                    Icons.add,
+                    size: 16.0,
+                  ),
+                  Text(
+                    "Create Event",
+                    style:
+                        TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0),
+                  )
+                ],
+              ),
             ),
           ],
         ),
@@ -103,7 +126,7 @@ class TitleSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 100.0,
+      height: 90.0,
       child: ListView(
         physics: NeverScrollableScrollPhysics(),
         controller: scrollController,

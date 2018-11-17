@@ -47,13 +47,14 @@ class _CardsState extends State<Cards> with TickerProviderStateMixin {
         AnimationController(vsync: this, duration: Duration(milliseconds: 250))
           ..addListener(() {
             setState(() {
+              final curve = CurvedAnimation(parent: _swipeController, curve: Curves.fastOutSlowIn);
               for (var i = 0; i < models.length - position; ++i) {
                 models[position + i].offset =
-                    offsetTweens[i].evaluate(_swipeController);
+                    offsetTweens[i].evaluate(curve);
                 models[position + i].sizeOffset =
-                    sizeOffsetTweens[i].evaluate(_swipeController);
+                    sizeOffsetTweens[i].evaluate(curve);
                 models[position + i].opacity =
-                    opacityTweens[i].evaluate(_swipeController);
+                    opacityTweens[i].evaluate(curve);
 
                 if (i == position) {
                   widget.onProgress(
@@ -74,13 +75,14 @@ class _CardsState extends State<Cards> with TickerProviderStateMixin {
         AnimationController(vsync: this, duration: Duration(milliseconds: 250))
           ..addListener(() {
             setState(() {
+              final curve = CurvedAnimation(parent: _backController, curve: Curves.fastOutSlowIn);
               for (var i = 0; i < models.length - position; ++i) {
                 models[position + i].offset =
-                    offsetTweens[i].evaluate(_backController);
+                    offsetTweens[i].evaluate(curve);
                 models[position + i].sizeOffset =
-                    sizeOffsetTweens[i].evaluate(_backController);
+                    sizeOffsetTweens[i].evaluate(curve);
                 models[position + i].opacity =
-                    opacityTweens[i].evaluate(_backController);
+                    opacityTweens[i].evaluate(curve);
 
                 if (i == position) {
                   widget.onProgress(
