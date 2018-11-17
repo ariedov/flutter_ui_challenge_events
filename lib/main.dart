@@ -29,6 +29,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   ScrollController scrollController;
+
+  Direction direction;
   int position = 0;
 
   @override
@@ -56,15 +58,28 @@ class _HomePageState extends State<HomePage> {
               onProgress: (progress, direction) {
                 final titleHeight = (60 + 48);
 
-                final offset = scrollController.offset;
                 var newOffset = progress * titleHeight / 100;
-                if (direction == Direction.BACK) {
-                  newOffset *= -1;
+                if (direction == Direction.AWAY) {
+                  newOffset += (position * titleHeight);
                 }
 
-                print(
-                    "progress: $progress; direction: $direction; offse: $offset, newOffset: $newOffset");
-                scrollController.jumpTo((position * titleHeight) + newOffset);
+                if (direction == Direction.BACK) {
+                  newOffset = ((position) * titleHeight) - newOffset;
+                }
+
+                if (progress == 100 && direction == Direction.NONE) {
+                  if (this.direction == Direction.AWAY) {
+                    position += 1;
+                  } else {
+                    position -= 1;
+                  }
+                } else {
+                  print(
+                      "progress: $progress; direction: $direction; newOffset: $newOffset");
+                  scrollController.jumpTo(newOffset);
+                }
+
+                this.direction = direction;
               },
             ),
           ],
@@ -77,8 +92,8 @@ class _HomePageState extends State<HomePage> {
 class TitleSwitcher extends StatelessWidget {
   final List<Title> titles = [
     Title("Fashion Talk", "Kyiv", "Nov 24, 2018"),
-    Title("Fashion Talk", "Kyiv", "Nov 24, 2018"),
-    Title("Fashion Talk", "Kyiv", "Nov 24, 2018"),
+    Title("Kabali show", "Kyiv", "Nov 25, 2018"),
+    Title("Yoke Party", "Kyiv", "Nov 24, 2018"),
   ];
 
   final ScrollController scrollController;
@@ -118,8 +133,7 @@ class EventTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: 32.0, vertical: 24.0),
+      padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
       child: SizedBox(
         height: 60.0,
         child: Row(

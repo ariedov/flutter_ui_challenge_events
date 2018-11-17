@@ -65,6 +65,8 @@ class _CardsState extends State<Cards> with TickerProviderStateMixin {
           ..addStatusListener((status) {
             if (status == AnimationStatus.completed) {
               position += 1;
+              widget.onProgress(100, Direction.NONE);
+              direction = Direction.NONE;
             }
           });
 
@@ -86,6 +88,12 @@ class _CardsState extends State<Cards> with TickerProviderStateMixin {
                 }
               }
             });
+          })
+          ..addStatusListener((status) {
+            if (status == AnimationStatus.completed) {
+              widget.onProgress(100, Direction.NONE);
+              direction = Direction.NONE;
+            }
           });
     super.initState();
   }
@@ -136,7 +144,12 @@ class _CardsState extends State<Cards> with TickerProviderStateMixin {
           model.offset += details.delta.dx;
           model.sizeOffset -= details.delta.dx / 12;
 
-          widget.onProgress(_calculateProgress(model.offset), direction);
+          var progress = _calculateProgress(model.offset);
+          if (direction == Direction.BACK) {
+            progress = 100 - progress;
+          }
+
+          widget.onProgress(progress, direction);
           continue;
         }
 
@@ -182,7 +195,6 @@ class _CardsState extends State<Cards> with TickerProviderStateMixin {
       }
       _backController.forward(from: 0.0);
     }
-    direction = Direction.NONE;
   }
 
   /// from 40 to -280
